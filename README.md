@@ -1,19 +1,19 @@
-# 🎫 Support tickets template
+# 🧪 SpecimenTracker
 
-A simple Streamlit app showing an internal tool that lets you create, manage, and visualize support tickets. 
+A Streamlit app for tracking specimen inventory through staining and imaging workflows.
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://support-tickets-template.streamlit.app/)
+Track specimens through stages like Formalin, Ethanol step up, Sudan black, Destain, Glycerol, Imaging, and storage.
 
 ### How to run it on your own machine
 
 1. Install the requirements
 
    ```
-   $ pip install -r requirements.txt
+   pip install -r requirements.txt
    ```
 
 2. Run the app
 
    ```
-   $ streamlit run streamlit_app.py
+   streamlit run streamlit_app.py
    ```
