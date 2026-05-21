@@ -1,172 +1,153 @@
 import datetime
-import random
 
 import altair as alt
-import numpy as np
 import pandas as pd
 import streamlit as st
 
-# Show app title and description.
-st.set_page_config(page_title="Support tickets", page_icon="🎫")
-st.title("🎫 Support tickets")
+st.set_page_config(page_title="Specimen Tracker", page_icon="🧫")
+st.title("🧪 Specimen Inventory Tracker")
 st.write(
     """
-    This app shows how you can build an internal tool in Streamlit. Here, we are 
-    implementing a support ticket workflow. The user can create a ticket, edit 
-    existing tickets, and view some statistics.
+    Track specimens through staining, imaging, and storage workflows.
+    Add specimens, update their current stain step, and monitor imaging status.
     """
 )
 
-# Create a random Pandas dataframe with existing tickets.
+STAGES = [
+    "Collected",
+    "Formalin",
+    "Formalin rinse",
+    "Trypsin",
+    "Ethanol 25%-Step UP",
+    "Ethanol 50%-Step UP",
+    "Ethanol 75%-Step UP",
+    "Sudan black",
+    "Destain 50% Ethanol",
+    "Destain 25% Ethanol",
+    "DI Water",
+    "70:30 Water:Glycerol",
+    "50:50 Water:Glycerol",
+    "25:75 Water:Glycerol",
+    "100% Glycerol",
+    "Imaging",
+    "Stored",
+]
+
 if "df" not in st.session_state:
-
-    # Set seed for reproducibility.
-    np.random.seed(42)
-
-    # Make up some fake issue descriptions.
-    issue_descriptions = [
-        "Network connectivity issues in the office",
-        "Software application crashing on startup",
-        "Printer not responding to print commands",
-        "Email server downtime",
-        "Data backup failure",
-        "Login authentication problems",
-        "Website performance degradation",
-        "Security vulnerability identified",
-        "Hardware malfunction in the server room",
-        "Employee unable to access shared files",
-        "Database connection failure",
-        "Mobile application not syncing data",
-        "VoIP phone system issues",
-        "VPN connection problems for remote employees",
-        "System updates causing compatibility issues",
-        "File server running out of storage space",
-        "Intrusion detection system alerts",
-        "Inventory management system errors",
-        "Customer data not loading in CRM",
-        "Collaboration tool not sending notifications",
+    sample_data = [
+        {
+            "Specimen ID": f"SPEC-{1000 + i}",
+            "Specimen Name": name,
+            "Museum loan #": f"LOAN-{1000 + i}",
+            "Source": f"Source-{1000 + i}",
+            "Current Step": step,
+            "Imaged": i % 3 == 0,
+            "Date Added": (datetime.date.today() - datetime.timedelta(days=16 - i * 2)).isoformat(),
+            "Last Updated": (datetime.date.today() - datetime.timedelta(days=16 - i * 2)).isoformat(),
+            "Comments": "",
+        }
+        for i, (name, step) in enumerate(
+            [
+                ("Sample A", "Collected"),
+                ("Sample B", "Formalin"),
+                ("Sample C", "Ethanol step up"),
+                ("Sample D", "Sudan black"),
+                ("Sample E", "Destain"),
+                ("Sample F", "Glycerol"),
+                ("Sample G", "Imaging"),
+                ("Sample H", "Stored"),
+            ]
+        )
     ]
+    st.session_state.df = pd.DataFrame(sample_data)
 
-    # Generate the dataframe with 100 rows/tickets.
-    data = {
-        "ID": [f"TICKET-{i}" for i in range(1100, 1000, -1)],
-        "Issue": np.random.choice(issue_descriptions, size=100),
-        "Status": np.random.choice(["Open", "In Progress", "Closed"], size=100),
-        "Priority": np.random.choice(["High", "Medium", "Low"], size=100),
-        "Date Submitted": [
-            datetime.date(2023, 6, 1) + datetime.timedelta(days=random.randint(0, 182))
-            for _ in range(100)
-        ],
+st.header("Add a specimen")
+with st.form("add_specimen_form"):
+    specimen_name = st.text_input("Specimen name")
+    current_step = st.selectbox("Current step", STAGES)
+    imaged = st.checkbox("Imaged")
+    comments = st.text_area("Comments")
+    submit_specimen = st.form_submit_button("Add specimen")
+
+if submit_specimen:
+    specimen_ids = [int(_) for _ in st.session_state.df["Specimen ID"].str.replace("SPEC-", "")]
+    next_id = max(specimen_ids) + 1 if specimen_ids else 1001
+    today = datetime.date.today().isoformat()
+    new_specimen = {
+        "Specimen ID": f"SPEC-{next_id}",
+        "Specimen Name": specimen_name or f"Specimen {next_id}",
+        "Current Step": current_step,
+        "Imaged": imaged,
+        "Date Added": today,
+        "Last Updated": today,
+        "Comments": comments,
     }
-    df = pd.DataFrame(data)
+    new_row = pd.DataFrame([new_specimen])
+    st.session_state.df = pd.concat([new_row, st.session_state.df], ignore_index=True)
+    st.success(f"Added {new_specimen['Specimen ID']}.")
+    st.dataframe(new_row, use_container_width=True, hide_index=True)
 
-    # Save the dataframe in session state (a dictionary-like object that persists across
-    # page runs). This ensures our data is persisted when the app updates.
-    st.session_state.df = df
-
-
-# Show a section to add a new ticket.
-st.header("Add a ticket")
-
-# We're adding tickets via an `st.form` and some input widgets. If widgets are used
-# in a form, the app will only rerun once the submit button is pressed.
-with st.form("add_ticket_form"):
-    issue = st.text_area("Describe the issue")
-    priority = st.selectbox("Priority", ["High", "Medium", "Low"])
-    submitted = st.form_submit_button("Submit")
-
-if submitted:
-    # Make a dataframe for the new ticket and append it to the dataframe in session
-    # state.
-    recent_ticket_number = int(max(st.session_state.df.ID).split("-")[1])
-    today = datetime.datetime.now().strftime("%m-%d-%Y")
-    df_new = pd.DataFrame(
-        [
-            {
-                "ID": f"TICKET-{recent_ticket_number+1}",
-                "Issue": issue,
-                "Status": "Open",
-                "Priority": priority,
-                "Date Submitted": today,
-            }
-        ]
-    )
-
-    # Show a little success message.
-    st.write("Ticket submitted! Here are the ticket details:")
-    st.dataframe(df_new, use_container_width=True, hide_index=True)
-    st.session_state.df = pd.concat([df_new, st.session_state.df], axis=0)
-
-# Show section to view and edit existing tickets in a table.
-st.header("Existing tickets")
-st.write(f"Number of tickets: `{len(st.session_state.df)}`")
-
+st.header("Inventory")
+st.write(f"Total specimens: **{len(st.session_state.df)}**")
 st.info(
-    "You can edit the tickets by double clicking on a cell. Note how the plots below "
-    "update automatically! You can also sort the table by clicking on the column headers.",
-    icon="✍️",
+    "Edit the current step, imaging status, or comments directly in the table."
+    " Use the stage chart below to monitor workflow progress.",
+    icon="🧬",
 )
 
-# Show the tickets dataframe with `st.data_editor`. This lets the user edit the table
-# cells. The edited data is returned as a new dataframe.
 edited_df = st.data_editor(
     st.session_state.df,
     use_container_width=True,
     hide_index=True,
     column_config={
-        "Status": st.column_config.SelectboxColumn(
-            "Status",
-            help="Ticket status",
-            options=["Open", "In Progress", "Closed"],
-            required=True,
+        "Current Step": st.column_config.SelectboxColumn(
+            "Current step",
+            options=STAGES,
         ),
-        "Priority": st.column_config.SelectboxColumn(
-            "Priority",
-            help="Priority",
-            options=["High", "Medium", "Low"],
-            required=True,
-        ),
+        "Imaged": st.column_config.BooleanColumn("Imaged"),
+        "Comments": st.column_config.TextAreaColumn("Comments"),
     },
-    # Disable editing the ID and Date Submitted columns.
-    disabled=["ID", "Date Submitted"],
+    disabled=["Specimen ID", "Date Added", "Last Updated"],
 )
 
-# Show some metrics and charts about the ticket.
-st.header("Statistics")
+if not edited_df.equals(st.session_state.df):
+    st.session_state.df = edited_df
 
-# Show metrics side by side using `st.columns` and `st.metric`.
+st.header("Workflow metrics")
 col1, col2, col3 = st.columns(3)
-num_open_tickets = len(st.session_state.df[st.session_state.df.Status == "Open"])
-col1.metric(label="Number of open tickets", value=num_open_tickets, delta=10)
-col2.metric(label="First response time (hours)", value=5.2, delta=-1.5)
-col3.metric(label="Average resolution time (hours)", value=16, delta=2)
+num_imaged = int(st.session_state.df[st.session_state.df.Imaged].shape[0])
+num_pending = int(st.session_state.df[~st.session_state.df.Imaged].shape[0])
+col1.metric(label="Total specimens", value=len(st.session_state.df))
+col2.metric(label="Imaged specimens", value=num_imaged)
+col3.metric(label="Pending imaging", value=num_pending)
 
-# Show two Altair charts using `st.altair_chart`.
-st.write("")
-st.write("##### Ticket status per month")
-status_plot = (
-    alt.Chart(edited_df)
+stage_counts = (
+    st.session_state.df.groupby("Current Step").size().reset_index(name="Count")
+)
+
+st.subheader("Specimen stage distribution")
+stage_plot = (
+    alt.Chart(stage_counts)
     .mark_bar()
     .encode(
-        x="month(Date Submitted):O",
-        y="count():Q",
-        xOffset="Status:N",
-        color="Status:N",
+        x=alt.X("Count:Q", title="Specimen count"),
+        y=alt.Y("Current Step:N", sort=STAGES, title="Workflow step"),
+        color=alt.Color("Current Step:N", legend=None),
+        tooltip=["Current Step", "Count"],
     )
-    .configure_legend(
-        orient="bottom", titleFontSize=14, labelFontSize=14, titlePadding=5
-    )
+    .properties(height=320)
 )
-st.altair_chart(status_plot, use_container_width=True, theme="streamlit")
+st.altair_chart(stage_plot, use_container_width=True)
 
-st.write("##### Current ticket priorities")
-priority_plot = (
-    alt.Chart(edited_df)
-    .mark_arc()
-    .encode(theta="count():Q", color="Priority:N")
-    .properties(height=300)
-    .configure_legend(
-        orient="bottom", titleFontSize=14, labelFontSize=14, titlePadding=5
+st.subheader("Imaging status")
+imaged_pie = (
+    alt.Chart(st.session_state.df)
+    .mark_arc(innerRadius=50)
+    .encode(
+        theta=alt.Theta(field="Imaged", type="quantitative", aggregate="count"),
+        color=alt.Color(field="Imaged", type="nominal", scale=alt.Scale(domain=[False, True], range=["#d62728", "#2ca02c"]), title="Imaged"),
+        tooltip=[alt.Tooltip("count()", title="Specimen count")],
     )
+    .properties(height=300)
 )
-st.altair_chart(priority_plot, use_container_width=True, theme="streamlit")
+st.altair_chart(imaged_pie, use_container_width=True)
