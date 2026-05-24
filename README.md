@@ -7,8 +7,7 @@ A Streamlit app for tracking specimen inventory through staining and imaging wor
 
 A simple Streamlit app that allows for inventory and management of specimens for clearing and staining! 
 
-[![Open in Streamlit]((https://humble-invention-rvv6px994rj2p95v-8501.app.github.dev/))]
-
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](http://localhost:8501)
 
 ### How to run it on your own machine
 
