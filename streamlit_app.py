@@ -53,6 +53,10 @@ if "df" not in st.session_state:
                 }
             ],
             "Comments": "",
+            "Standard Length": "",
+            "Total Length": "",
+            "IACUC #": "",
+            "Collections permit #": "",
         }
         for i, (name, step) in enumerate(
             [
@@ -77,8 +81,12 @@ if "df" not in st.session_state:
             ],
             axis=1,
         )
+    # ensure new metadata columns exist for older or restored sessions
+    for col in ["Standard Length", "Total Length", "IACUC #", "Collections permit #"]:
+        if col not in st.session_state.df.columns:
+            st.session_state.df[col] = ""
 
-tab1, tab2 = st.tabs(["Inventory", "Steps to follow"])
+tab1, tab2, tab3 = st.tabs(["Inventory", "Status", "Steps to follow"])
 
 with tab1:
     st.header("Log a new specimen")
@@ -86,6 +94,10 @@ with tab1:
         specimen_name = st.text_input("Specimen name")
         museum_loan = st.text_input("Museum loan #")
         source = st.text_input("Source")
+        standard_length = st.text_input("Standard length")
+        total_length = st.text_input("Total length")
+        iacuc_number = st.text_input("IACUC #")
+        collections_permit = st.text_input("Collections permit #")
         submit_specimen = st.form_submit_button("Log specimen")
 
     if submit_specimen:
@@ -99,6 +111,10 @@ with tab1:
             "Imaged": False,
             "Museum loan #": museum_loan or f"LOAN-{next_id}",
             "Source": source,
+            "Standard Length": standard_length,
+            "Total Length": total_length,
+            "IACUC #": iacuc_number,
+            "Collections permit #": collections_permit,
             "Date Added": today,
             "Last Updated": today,
             "Comments": "",
@@ -114,7 +130,7 @@ with tab1:
     st.info(
         "Edit the current step, imaging status, or comments directly in the table to track progress."
         " Specimens start at 'Collected' and are updated as they move through the workflow.",
-        icon="🧬",
+        icon="🐟",
     )
 
     edited_df = st.data_editor(
@@ -128,6 +144,10 @@ with tab1:
             ),
             "Imaged": st.column_config.CheckboxColumn("Imaged"),
             "Comments": st.column_config.TextColumn("Comments"),
+            "Standard Length": st.column_config.TextColumn("Standard length"),
+            "Total Length": st.column_config.TextColumn("Total length"),
+            "IACUC #": st.column_config.TextColumn("IACUC #"),
+            "Collections permit #": st.column_config.TextColumn("Collections permit #"),
         },
         disabled=["Specimen ID", "Date Added", "Last Updated"],
     )
@@ -338,6 +358,65 @@ with tab1:
     st.altair_chart(imaged_pie, use_container_width=True)
 
 with tab2:
+    st.header("Update specimen status")
+    st.write("Use this tab to change a specimen\'s current workflow step and update the inventory current-step chart.")
+
+    current_counts = (
+        st.session_state.df["Current Step"].value_counts()
+        .reindex(STAGES, fill_value=0)
+        .reset_index()
+    )
+    current_counts.columns = ["Current Step", "Count"]
+    status_chart = (
+        alt.Chart(current_counts)
+        .mark_bar()
+        .encode(
+            x=alt.X("Count:Q", title="Specimen count", scale=alt.Scale(domain=[0, max(current_counts["Count"].max(), 1)])),
+            y=alt.Y("Current Step:N", sort=STAGES, title="Current step"),
+            color=alt.Color("Current Step:N", legend=None),
+            tooltip=["Current Step", "Count"],
+        )
+        .properties(height=360)
+    )
+    st.altair_chart(status_chart, use_container_width=True)
+
+    specimen_options = (
+        st.session_state.df["Specimen ID"] + " | " + st.session_state.df["Specimen Name"]
+    ).tolist()
+    selected_specimen = st.selectbox("Choose specimen", specimen_options)
+    selected_id = selected_specimen.split(" | ")[0]
+    selected_row = st.session_state.df.loc[st.session_state.df["Specimen ID"] == selected_id].iloc[0]
+
+    with st.form("update_status_form"):
+        st.markdown(f"**Current step:** {selected_row['Current Step']}")
+        new_step = st.selectbox(
+            "New current step",
+            STAGES,
+            index=STAGES.index(selected_row["Current Step"]) if selected_row["Current Step"] in STAGES else 0,
+        )
+        update_step = st.form_submit_button("Update step")
+
+    if update_step:
+        if new_step != selected_row["Current Step"]:
+            idx = st.session_state.df.index[st.session_state.df["Specimen ID"] == selected_id][0]
+            today_iso = datetime.date.today().isoformat()
+            st.session_state.df.at[idx, "Current Step"] = new_step
+            st.session_state.df.at[idx, "Last Updated"] = today_iso
+            history = selected_row.get("Step History") or []
+            history = list(history)
+            if history:
+                history[-1] = dict(history[-1])
+                if history[-1].get("end_date") is None:
+                    history[-1]["end_date"] = today_iso
+            else:
+                history.append({"step": selected_row["Current Step"], "start_date": selected_row["Date Added"], "end_date": today_iso})
+            history.append({"step": new_step, "start_date": today_iso, "end_date": None})
+            st.session_state.df.at[idx, "Step History"] = history
+            st.success(f"Updated {selected_id} to {new_step}.")
+        else:
+            st.info("The specimen is already at that step.")
+
+with tab3:
     st.header("Steps to follow")
     st.write(
         "Use this tab as a workflow guide to move specimens through each staining and imaging stage."
