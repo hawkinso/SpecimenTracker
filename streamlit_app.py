@@ -5,7 +5,7 @@ import pandas as pd
 import streamlit as st
 
 st.set_page_config(page_title="Specimen Tracker", page_icon="🧫")
-st.title("🧪 Specimen Inventory Tracker")
+st.title("🐠 Specimen Inventory Tracker")
 st.write(
     """
     Track specimens through staining, imaging, and storage workflows.
@@ -346,13 +346,13 @@ with tab2:
         {"Step": step, "Action": action}
         for step, action in [
             ("Collected", "Record specimen details and start initial processing."),
-            ("Formalin", "Fix the specimen in formalin to preserve tissue."),
+            ("Formalin", "Fix the specimen in 10% buffered formalin to preserve tissue."),
             ("Formalin rinse", "Rinse the specimen to remove excess formalin."),
-            ("Trypsin", "Digest proteins gently with trypsin as required."),
+            ("Trypsin", "Digest proteins gently with trypsin. This step must be monitored closely."),
             ("Ethanol 25%-Step UP", "Begin ethanol dehydration at 25% concentration."),
             ("Ethanol 50%-Step UP", "Continue dehydration with 50% ethanol."),
             ("Ethanol 75%-Step UP", "Advance dehydration with 75% ethanol."),
-            ("Sudan black", "Stain the specimen with Sudan black."),
+            ("Sudan black", "Stain the specimen with Sudan black B. Monitor progression using the scope."),
             ("Destain 50% Ethanol", "Begin destaining in 50% ethanol."),
             ("Destain 25% Ethanol", "Continue destaining in 25% ethanol."),
             ("DI Water", "Rinse the specimen with deionized water."),
