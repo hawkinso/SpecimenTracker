@@ -187,7 +187,7 @@ with tab1:
         options=specimen_options,
         help="Choose specimen rows to remove from the inventory.",
     )
-    if st.button("Delete selected specimens", type="danger"):
+    if st.button("Delete selected specimens", type="primary"):
         if delete_selection:
             delete_ids = [item.split(" | ")[0] for item in delete_selection]
             before_count = len(st.session_state.df)
