@@ -1,4 +1,7 @@
 import datetime
+import json
+import os
+from pathlib import Path
 
 import altair as alt
 import pandas as pd
@@ -33,8 +36,42 @@ STAGES = [
     "Stored",
 ]
 
+DATA_DIR = Path("data")
+DATA_DIR.mkdir(exist_ok=True)
+DATA_FILE = DATA_DIR / "specimens.json"
+
+
+def load_data():
+    if DATA_FILE.exists():
+        try:
+            with open(DATA_FILE, "r", encoding="utf-8") as fh:
+                records = json.load(fh)
+            df = pd.DataFrame(records)
+            # ensure Step History column exists
+            if "Step History" not in df.columns:
+                df["Step History"] = df.apply(
+                    lambda r: [{"step": r.get("Current Step", "Collected"), "start_date": r.get("Date Added", datetime.date.today().isoformat()), "end_date": None}],
+                    axis=1,
+                )
+            return df
+        except Exception:
+            return None
+    return None
+
+
+def save_data(df: pd.DataFrame):
+    # convert non-serializable objects to basic types
+    records = df.to_dict(orient="records")
+    with open(DATA_FILE, "w", encoding="utf-8") as fh:
+        json.dump(records, fh, default=str, indent=2)
+
+
 if "df" not in st.session_state:
-    sample_data = [
+    loaded = load_data()
+    if loaded is not None:
+        st.session_state.df = loaded
+    else:
+        sample_data = [
         {
             "Specimen ID": f"SPEC-{1000 + i}",
             "Specimen Name": name,
@@ -72,7 +109,7 @@ if "df" not in st.session_state:
             ]
         )
     ]
-    st.session_state.df = pd.DataFrame(sample_data)
+        st.session_state.df = pd.DataFrame(sample_data)
     # ensure Step History column exists for older datasets
     if "Step History" not in st.session_state.df.columns:
         st.session_state.df["Step History"] = st.session_state.df.apply(
@@ -85,6 +122,11 @@ if "df" not in st.session_state:
     for col in ["Standard Length", "Total Length", "IACUC #", "Collections permit #"]:
         if col not in st.session_state.df.columns:
             st.session_state.df[col] = ""
+    # persist initial sample data
+    try:
+        save_data(st.session_state.df)
+    except Exception:
+        pass
 
 tab1, tab2, tab3 = st.tabs(["Inventory", "Status", "Steps to follow"])
 
@@ -124,6 +166,10 @@ with tab1:
         st.session_state.df = pd.concat([new_row, st.session_state.df], ignore_index=True)
         st.success(f"Logged {new_specimen['Specimen ID']}.")
         st.dataframe(new_row, use_container_width=True, hide_index=True)
+        try:
+            save_data(st.session_state.df)
+        except Exception:
+            st.warning("Failed to save specimen to disk. Changes are kept in this session.")
 
     st.header("Inventory")
     st.write(f"Total specimens: **{len(st.session_state.df)}**")
@@ -180,6 +226,10 @@ with tab1:
                 edited_df.at[idx, "Step History"] = history
         edited_df.loc[diff_mask, "Last Updated"] = today_iso
         st.session_state.df = edited_df
+        try:
+            save_data(st.session_state.df)
+        except Exception:
+            st.warning("Failed to save edits to disk. Changes are kept in this session.")
 
     st.header("Workflow metrics")
     col1, col2, col3 = st.columns(3)
@@ -413,6 +463,10 @@ with tab2:
             history.append({"step": new_step, "start_date": today_iso, "end_date": None})
             st.session_state.df.at[idx, "Step History"] = history
             st.success(f"Updated {selected_id} to {new_step}.")
+            try:
+                save_data(st.session_state.df)
+            except Exception:
+                st.warning("Failed to persist update; change is in-memory only.")
         else:
             st.info("The specimen is already at that step.")
 

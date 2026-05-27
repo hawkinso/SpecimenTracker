@@ -1,0 +1,178 @@
+[
+  {
+    "Specimen ID": "SPEC-1000",
+    "Specimen Name": "Sample A",
+    "Museum loan #": "LOAN-1000",
+    "Source": "Source-1000",
+    "Current Step": "Collected",
+    "Imaged": true,
+    "Date Added": "2026-05-11",
+    "Last Updated": "2026-05-11",
+    "Step History": [
+      {
+        "step": "Collected",
+        "start_date": "2026-05-11",
+        "end_date": null
+      }
+    ],
+    "Comments": "",
+    "Standard Length": "",
+    "Total Length": "",
+    "IACUC #": "",
+    "Collections permit #": ""
+  },
+  {
+    "Specimen ID": "SPEC-1001",
+    "Specimen Name": "Sample B",
+    "Museum loan #": "LOAN-1001",
+    "Source": "Source-1001",
+    "Current Step": "Formalin",
+    "Imaged": false,
+    "Date Added": "2026-05-13",
+    "Last Updated": "2026-05-13",
+    "Step History": [
+      {
+        "step": "Formalin",
+        "start_date": "2026-05-13",
+        "end_date": null
+      }
+    ],
+    "Comments": "",
+    "Standard Length": "",
+    "Total Length": "",
+    "IACUC #": "",
+    "Collections permit #": ""
+  },
+  {
+    "Specimen ID": "SPEC-1002",
+    "Specimen Name": "Sample C",
+    "Museum loan #": "LOAN-1002",
+    "Source": "Source-1002",
+    "Current Step": "Ethanol 25%-Step UP",
+    "Imaged": false,
+    "Date Added": "2026-05-15",
+    "Last Updated": "2026-05-15",
+    "Step History": [
+      {
+        "step": "Ethanol 25%-Step UP",
+        "start_date": "2026-05-15",
+        "end_date": null
+      }
+    ],
+    "Comments": "",
+    "Standard Length": "",
+    "Total Length": "",
+    "IACUC #": "",
+    "Collections permit #": ""
+  },
+  {
+    "Specimen ID": "SPEC-1003",
+    "Specimen Name": "Sample D",
+    "Museum loan #": "LOAN-1003",
+    "Source": "Source-1003",
+    "Current Step": "Sudan black",
+    "Imaged": true,
+    "Date Added": "2026-05-17",
+    "Last Updated": "2026-05-17",
+    "Step History": [
+      {
+        "step": "Sudan black",
+        "start_date": "2026-05-17",
+        "end_date": null
+      }
+    ],
+    "Comments": "",
+    "Standard Length": "",
+    "Total Length": "",
+    "IACUC #": "",
+    "Collections permit #": ""
+  },
+  {
+    "Specimen ID": "SPEC-1004",
+    "Specimen Name": "Sample E",
+    "Museum loan #": "LOAN-1004",
+    "Source": "Source-1004",
+    "Current Step": "Destain 50% Ethanol",
+    "Imaged": false,
+    "Date Added": "2026-05-19",
+    "Last Updated": "2026-05-19",
+    "Step History": [
+      {
+        "step": "Destain 50% Ethanol",
+        "start_date": "2026-05-19",
+        "end_date": null
+      }
+    ],
+    "Comments": "",
+    "Standard Length": "",
+    "Total Length": "",
+    "IACUC #": "",
+    "Collections permit #": ""
+  },
+  {
+    "Specimen ID": "SPEC-1005",
+    "Specimen Name": "Sample F",
+    "Museum loan #": "LOAN-1005",
+    "Source": "Source-1005",
+    "Current Step": "100% Glycerol",
+    "Imaged": false,
+    "Date Added": "2026-05-21",
+    "Last Updated": "2026-05-21",
+    "Step History": [
+      {
+        "step": "100% Glycerol",
+        "start_date": "2026-05-21",
+        "end_date": null
+      }
+    ],
+    "Comments": "",
+    "Standard Length": "",
+    "Total Length": "",
+    "IACUC #": "",
+    "Collections permit #": ""
+  },
+  {
+    "Specimen ID": "SPEC-1006",
+    "Specimen Name": "Sample G",
+    "Museum loan #": "LOAN-1006",
+    "Source": "Source-1006",
+    "Current Step": "Imaging",
+    "Imaged": true,
+    "Date Added": "2026-05-23",
+    "Last Updated": "2026-05-23",
+    "Step History": [
+      {
+        "step": "Imaging",
+        "start_date": "2026-05-23",
+        "end_date": null
+      }
+    ],
+    "Comments": "",
+    "Standard Length": "",
+    "Total Length": "",
+    "IACUC #": "",
+    "Collections permit #": ""
+  },
+  {
+    "Specimen ID": "SPEC-1007",
+    "Specimen Name": "Sample H",
+    "Museum loan #": "LOAN-1007",
+    "Source": "Source-1007",
+    "Current Step": "Stored",
+    "Imaged": false,
+    "Date Added": "2026-05-25",
+    "Last Updated": "2026-05-25",
+    "Step History": [
+      {
+        "step": "Stored",
+        "start_date": "2026-05-25",
+        "end_date": null
+      }
+    ],
+    "Comments": "",
+    "Standard Length": "",
+    "Total Length": "",
+    "IACUC #": "",
+    "Collections permit #": ""
+  }
+]
