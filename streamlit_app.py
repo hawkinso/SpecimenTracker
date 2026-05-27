@@ -179,6 +179,24 @@ with tab1:
         icon="🐟",
     )
 
+    specimen_options = (
+        st.session_state.df["Specimen ID"] + " | " + st.session_state.df["Specimen Name"]
+    ).tolist()
+    delete_selection = st.multiselect(
+        "Select specimens to delete",
+        options=specimen_options,
+        help="Choose specimen rows to remove from the inventory.",
+    )
+    if st.button("Delete selected specimens", type="danger"):
+        if delete_selection:
+            delete_ids = [item.split(" | ")[0] for item in delete_selection]
+            before_count = len(st.session_state.df)
+            st.session_state.df = st.session_state.df[~st.session_state.df["Specimen ID"].isin(delete_ids)].reset_index(drop=True)
+            deleted_count = before_count - len(st.session_state.df)
+            st.success(f"Deleted {deleted_count} specimen row(s).")
+        else:
+            st.warning("Select at least one specimen to delete.")
+
     edited_df = st.data_editor(
         st.session_state.df,
         use_container_width=True,
